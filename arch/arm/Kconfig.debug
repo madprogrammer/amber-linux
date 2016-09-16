@@ -262,6 +262,13 @@ choice
 		  Say Y here if you want kernel low-level debugging support
 		  on Cirrus Logic EP93xx based platforms.
 
+	config DEBUG_UART_AMBER
+		bool "Kernel low-level debugging messages via Amber SoC UART"
+		depends on ARCH_AMBER
+		help
+		  Say Y here if you want kernel low-level debugging support
+		  on Amber SoC based platforms.
+
 	config DEBUG_FOOTBRIDGE_COM1
 		bool "Kernel low-level debugging messages via footbridge 8250 at PCI COM1"
 		depends on FOOTBRIDGE
@@ -1393,6 +1400,7 @@ config DEBUG_LL_INCLUDE
 	default "debug/exynos.S" if DEBUG_EXYNOS_UART
 	default "debug/efm32.S" if DEBUG_LL_UART_EFM32
 	default "debug/icedcc.S" if DEBUG_ICEDCC
+	default "debug/amber.S" if DEBUG_UART_AMBER
 	default "debug/imx.S" if DEBUG_IMX1_UART || \
 				 DEBUG_IMX25_UART || \
 				 DEBUG_IMX21_IMX27_UART || \
@@ -1444,6 +1452,7 @@ config DEBUG_UART_8250
 
 config DEBUG_UART_PHYS
 	hex "Physical base address of debug UART"
+	default 0x16000000 if DEBUG_UART_AMBER
 	default 0x00100a00 if DEBUG_NETX_UART
 	default 0x01c20000 if DEBUG_DAVINCI_DMx_UART0
 	default 0x01c28000 if DEBUG_SUNXI_UART0
@@ -1549,7 +1558,7 @@ config DEBUG_UART_PHYS
 	        DEBUG_LL_UART_8250 || DEBUG_LL_UART_PL01X || \
 		DEBUG_LL_UART_EFM32 || \
 		DEBUG_UART_8250 || DEBUG_UART_PL01X || DEBUG_MESON_UARTAO || \
-		DEBUG_NETX_UART || \
+		DEBUG_NETX_UART || DEBUG_UART_AMBER || \
 		DEBUG_QCOM_UARTDM || DEBUG_R7S72100_SCIF2 || \
 		DEBUG_RCAR_GEN1_SCIF0 || DEBUG_RCAR_GEN1_SCIF2 || \
 		DEBUG_RCAR_GEN2_SCIF0 || DEBUG_RCAR_GEN2_SCIF2 || \
@@ -1562,6 +1571,7 @@ config DEBUG_UART_PHYS
 
 config DEBUG_UART_VIRT
 	hex "Virtual base address of debug UART"
+	default 0x16000000 if DEBUG_UART_AMBER
 	default 0xe0000a00 if DEBUG_NETX_UART
 	default 0xe0010fe0 if ARCH_RPC
 	default 0xf0000be0 if ARCH_EBSA110
@@ -1653,7 +1663,7 @@ config DEBUG_UART_VIRT
 	default DEBUG_UART_PHYS if !MMU
 	depends on DEBUG_LL_UART_8250 || DEBUG_LL_UART_PL01X || \
 		DEBUG_UART_8250 || DEBUG_UART_PL01X || DEBUG_MESON_UARTAO || \
-		DEBUG_NETX_UART || \
+		DEBUG_NETX_UART || DEBUG_UART_AMBER || \
 		DEBUG_QCOM_UARTDM || DEBUG_S3C24XX_UART || \
 		DEBUG_S3C64XX_UART || \
 		DEBUG_BCM63XX_UART || DEBUG_ASM9260_UART || \

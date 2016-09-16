@@ -1043,24 +1043,43 @@ vector_\name:
 	@ (parent CPSR)
 	@
 	stmia	sp, {r0, lr}		@ save r0, lr
+#ifndef CONFIG_ARCH_AMBER
 	mrs	lr, spsr
 	str	lr, [sp, #8]		@ save spsr
+#endif
 
 	@
 	@ Prepare for SVC32 mode.  IRQs remain disabled.
 	@
+#ifndef CONFIG_ARCH_AMBER
 	mrs	r0, cpsr
 	eor	r0, r0, #(\mode ^ SVC_MODE | PSR_ISETSTATE)
 	msr	spsr_cxsf, r0
+#else
+	teqp pc, #0x08000003	@ switch to SVC mode
+	mov lr, pc
+	and lr, lr, #0xFC000003
+	str lr, [sp, #8]		@ save flags
+#endif
 
 	@
 	@ the branch table must immediately follow this code
 	@
+#ifndef CONFIG_ARCH_AMBER
 	and	lr, lr, #0x0f
+#else
+	mov lr, pc
+	orr	lr, #0x08000003
+	and lr, lr, #0x03
+	add lr, lr, #1
+#endif
  THUMB(	adr	r0, 1f			)
  THUMB(	ldr	lr, [r0, lr, lsl #2]	)
 	mov	r0, sp
  ARM(	ldr	lr, [pc, lr, lsl #2]	)
+#ifdef CONFIG_ARCH_AMBER
+	orr lr, #0x08000003
+#endif
 	movs	pc, lr			@ branch to handler in SVC mode
 ENDPROC(vector_\name)
 

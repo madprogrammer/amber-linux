@@ -12,6 +12,10 @@
 #define IRQMASK_REG_NAME_R "primask"
 #define IRQMASK_REG_NAME_W "primask"
 #define IRQMASK_I_BIT	1
+#elif  CONFIG_CPU_AMBER
+#define IRQMASK_REG_NAME_R "pc"
+#define IRQMASK_REG_NAME_W "pc"
+#define IRQMASK_I_BIT	0x08000000
 #else
 #define IRQMASK_REG_NAME_R "cpsr"
 #define IRQMASK_REG_NAME_W "cpsr_c"
@@ -62,7 +66,7 @@ static inline void arch_local_irq_disable(void)
 #define local_abt_enable()	do { } while (0)
 #define local_abt_disable()	do { } while (0)
 #endif
-#else
+#else /* __LINUX_ARM_ARCH__ >= 6 */
 
 /*
  * Save the current interrupt enable state & disable IRQs
@@ -71,11 +75,16 @@ static inline void arch_local_irq_disable(void)
 static inline unsigned long arch_local_irq_save(void)
 {
 	unsigned long flags, temp;
-
 	asm volatile(
+#if !defined(CONFIG_CPU_AMBER)
 		"	mrs	%0, cpsr	@ arch_local_irq_save\n"
 		"	orr	%1, %0, #128\n"
 		"	msr	cpsr_c, %1"
+#else
+		"   mov %0, pc		@ arch_local_irq_save\n"
+		"	orr %1, %0, #0x08000000\n"
+		"	teqp %1, #0"
+#endif
 		: "=r" (flags), "=r" (temp)
 		:
 		: "memory", "cc");
@@ -90,9 +99,14 @@ static inline void arch_local_irq_enable(void)
 {
 	unsigned long temp;
 	asm volatile(
+#if !defined(CONFIG_CPU_AMBER)
 		"	mrs	%0, cpsr	@ arch_local_irq_enable\n"
 		"	bic	%0, %0, #128\n"
 		"	msr	cpsr_c, %0"
+#else
+		"   mov %0, #0xF4000003\n"
+		"	tstp %0, pc"
+#endif
 		: "=r" (temp)
 		:
 		: "memory", "cc");
@@ -106,9 +120,15 @@ static inline void arch_local_irq_disable(void)
 {
 	unsigned long temp;
 	asm volatile(
+#if !defined(CONFIG_CPU_AMBER)
 		"	mrs	%0, cpsr	@ arch_local_irq_disable\n"
 		"	orr	%0, %0, #128\n"
 		"	msr	cpsr_c, %0"
+#else
+		"	mov %0, pc		@ arch_local_irq_disable\n"
+		"	orr %0, %0, #0x08000000\n"
+		"	teqp %0, #0"
+#endif
 		: "=r" (temp)
 		:
 		: "memory", "cc");
@@ -117,6 +137,7 @@ static inline void arch_local_irq_disable(void)
 /*
  * Enable FIQs
  */
+#if !defined(CONFIG_CPU_AMBER)
 #define local_fiq_enable()					\
 	({							\
 		unsigned long temp;				\
@@ -128,10 +149,22 @@ static inline void arch_local_irq_disable(void)
 	:							\
 	: "memory", "cc");					\
 	})
-
+#else
+#define local_fiq_enable()					\
+	({							\
+		unsigned long temp;				\
+	__asm__ __volatile__(					\
+	"mov	%0, #0xF8000003		@ stf\n"		\
+"	tstp %0, pc"					\
+	: "=r" (temp)						\
+	:							\
+	: "memory", "cc");					\
+	})
+#endif
 /*
  * Disable FIQs
  */
+#if !defined(CONFIG_CPU_AMBER)
 #define local_fiq_disable()					\
 	({							\
 		unsigned long temp;				\
@@ -143,6 +176,19 @@ static inline void arch_local_irq_disable(void)
 	:							\
 	: "memory", "cc");					\
 	})
+#else
+#define local_fiq_disable()					\
+	({							\
+		unsigned long temp;				\
+	__asm__ __volatile__(					\
+	"mov	%0, pc			@ clf\n"		\
+"	orr	%0, %0, #0x04000000\n"				\
+"	teqp %0, #0"					\
+	: "=r" (temp)						\
+	:							\
+	: "memory", "cc");					\
+	})
+#endif
 
 #define local_abt_enable()	do { } while (0)
 #define local_abt_disable()	do { } while (0)
@@ -155,9 +201,15 @@ static inline void arch_local_irq_disable(void)
 static inline unsigned long arch_local_save_flags(void)
 {
 	unsigned long flags;
+#if !defined(CONFIG_CPU_AMBER)
 	asm volatile(
 		"	mrs	%0, " IRQMASK_REG_NAME_R "	@ local_save_flags"
 		: "=r" (flags) : : "memory", "cc");
+#else
+	asm volatile(
+		"	mov %0, " IRQMASK_REG_NAME_R " @ local_save_flags"
+		: "=r" (flags) : : "memory", "cc");
+#endif
 	return flags;
 }
 
@@ -167,11 +219,19 @@ static inline unsigned long arch_local_save_flags(void)
 #define arch_local_irq_restore arch_local_irq_restore
 static inline void arch_local_irq_restore(unsigned long flags)
 {
+#if !defined(CONFIG_CPU_AMBER)
 	asm volatile(
 		"	msr	" IRQMASK_REG_NAME_W ", %0	@ local_irq_restore"
 		:
 		: "r" (flags)
 		: "memory", "cc");
+#else
+	asm volatile(
+		"	teqp pc, %0"
+		:
+		: "r" (flags)
+		: "memory", "cc");
+#endif
 }
 
 #define arch_irqs_disabled_flags arch_irqs_disabled_flags

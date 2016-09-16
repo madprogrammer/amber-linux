@@ -522,7 +522,7 @@ static void __init elf_hwcap_fixup(void)
  */
 void notrace cpu_init(void)
 {
-#ifndef CONFIG_CPU_V7M
+#if !defined(CONFIG_CPU_V7M) && !defined(CONFIG_ARCH_AMBER)
 	unsigned int cpu = smp_processor_id();
 	struct stack *stk = &stacks[cpu];
 

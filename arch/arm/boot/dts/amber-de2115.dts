@@ -1,0 +1,51 @@
+/*
+ * Device Tree for the Amber SoC on Terasic DE2-115
+ */
+
+/dts-v1/;
+/include/ "amber.dtsi"
+
+/ {
+	model = "Terasic DE2-115 (Amber SoC)";
+	compatible = "terasic,amber-de2115";
+
+	memory {
+		device_type = "memory";
+		reg = <0x0 0x08000000>;  // 128M at 0x0
+	};
+
+	chosen {
+		bootargs = "console=ttyAM0 lpj=9530 earlyprintk";
+	};
+
+	/* This is a 40MHz PLL */
+	xtal40mhz: xtal40mhz@40M {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <40000000>;
+	};
+
+	/* The UART clock is 14.74 MHz */
+	uartclk: uartclk@14.74M {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <14745600>;
+	};
+
+	timer0: timer@13000000 {
+		compatible = "arm,integrator-cp-timer";
+		clocks = <&xtal40mhz>;
+	};
+
+	pic: pic@14000000 {
+		valid-mask = <0x000000e6>;
+	};
+
+	fpga {
+		uart@16000000 {
+			compatible = "arm,pl011", "arm,primecell";
+			clocks = <&uartclk>;
+			clock-names = "uartclk";
+		};
+	};
+};

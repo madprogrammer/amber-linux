@@ -48,7 +48,7 @@ static inline uint32_t __div64_32(uint64_t *n, uint32_t base)
 }
 #define __div64_32 __div64_32
 
-#if !defined(CONFIG_AEABI)
+#if !defined(CONFIG_AEABI) || defined(CONFIG_ARCH_AMBER)
 
 /*
  * In OABI configurations, some uses of the do_div function

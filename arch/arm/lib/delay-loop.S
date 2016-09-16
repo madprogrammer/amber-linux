@@ -27,7 +27,9 @@ ENTRY(__loop_udelay)
 ENTRY(__loop_const_udelay)			@ 0 <= r0 <= 0x7fffff06
 		ldr	r2, .LC0
 		ldr	r2, [r2]
+#if !defined(CONFIG_ARCH_AMBER)
 		umull	r1, r0, r2, r0
+#endif
 		adds	r1, r1, #0xffffffff
 		adcs	r0, r0, r0
 		reteq	lr

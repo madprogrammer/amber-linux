@@ -206,6 +206,7 @@ postcore_initcall(amba_init);
 
 static int amba_get_enable_pclk(struct amba_device *pcdev)
 {
+#if !defined(CONFIG_ARCH_AMBER)
 	int ret;
 
 	pcdev->pclk = clk_get(&pcdev->dev, "apb_pclk");
@@ -217,6 +218,9 @@ static int amba_get_enable_pclk(struct amba_device *pcdev)
 		clk_put(pcdev->pclk);
 
 	return ret;
+#else
+	return 0;
+#endif
 }
 
 static void amba_put_disable_pclk(struct amba_device *pcdev)

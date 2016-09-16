@@ -1,0 +1,39 @@
+/*
+ * SoC core Device Tree for the Amber SoC platform
+ */
+
+/include/ "skeleton.dtsi"
+
+/ {
+	cpu@0 {
+		compatible = "arm,arm7tdmi";
+	};
+
+	timer@13000000 {
+		reg = <0x13000000 0x100>;
+		interrupt-parent = <&pic>;
+		interrupts = <5>;
+	};
+
+	pic@14000000 {
+		compatible = "arm,versatile-fpga-irq";
+		#interrupt-cells = <1>;
+		interrupt-controller;
+		reg = <0x14000000 0x100>;
+		clear-mask = <0xffffffff>;
+	};
+
+	fpga {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+		interrupt-parent = <&pic>;
+
+		uart@16000000 {
+			reg = <0x16000000 0x1000>;
+			interrupt-parent = <&pic>;
+			interrupts = <1>;
+		};
+	};
+};

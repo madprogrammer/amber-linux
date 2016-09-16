@@ -170,6 +170,8 @@ dtb-$(CONFIG_ARCH_HIX5HD2) += \
 dtb-$(CONFIG_ARCH_INTEGRATOR) += \
 	integratorap.dtb \
 	integratorcp.dtb
+dtb-$(CONFIG_ARCH_AMBER) += \
+	amber-de2115.dtb
 dtb-$(CONFIG_ARCH_KEYSTONE) += \
 	keystone-k2hk-evm.dtb \
 	keystone-k2l-evm.dtb \

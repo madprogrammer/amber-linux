@@ -4,6 +4,21 @@ comment "Processor Type"
 # which CPUs we support in the kernel image, and the compiler instruction
 # optimiser behaviour.
 
+# Amber SoC
+config CPU_AMBER
+	bool
+	depends on !MMU
+	select CPU_32v3
+	select CPU_CACHE_V4
+	select CPU_ABRT_NOMMU
+	select CPU_PABRT_LEGACY
+	help
+	  A 32-bit RISC microprocessor based on the ARMv2a architecture
+	  which has no memory control unit.
+
+	  Say Y if you want support for the Amber processor core.
+	  Otherwise, say N.
+
 # ARM7TDMI
 config CPU_ARM7TDMI
 	bool

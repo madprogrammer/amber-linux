@@ -1,0 +1,15 @@
+if ARCH_AMBER
+
+menu "Amber SoC implementations"
+
+config MACH_DE2115
+	bool "Terasic DE2-115 Development Board"
+	select VERSATILE_FPGA_IRQ
+	help
+	  Say 'Y' here if you want your kernel to support the
+	  Terasic DE2-115 development boardc.
+
+endmenu
+
+endif
+
