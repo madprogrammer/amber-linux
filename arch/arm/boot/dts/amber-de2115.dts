@@ -11,7 +11,7 @@
 
 	memory {
 		device_type = "memory";
-		reg = <0x0 0x08000000>;  // 128M at 0x0
+		reg = <0x0 0x04000000>;  // 64M at 0x0
 	};
 
 	chosen {
