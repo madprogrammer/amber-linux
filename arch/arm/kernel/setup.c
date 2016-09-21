@@ -522,7 +522,7 @@ static void __init elf_hwcap_fixup(void)
  */
 void notrace cpu_init(void)
 {
-#if !defined(CONFIG_CPU_V7M) && !defined(CONFIG_ARCH_AMBER)
+#if !defined(CONFIG_CPU_V7M)
 	unsigned int cpu = smp_processor_id();
 	struct stack *stk = &stacks[cpu];
 
@@ -548,10 +548,10 @@ void notrace cpu_init(void)
 #else
 #define PLC	"I"
 #endif
-
 	/*
 	 * setup stacks for re-entrant exception handlers
 	 */
+#ifndef CONFIG_ARCH_AMBER
 	__asm__ (
 	"msr	cpsr_c, %1\n\t"
 	"add	r14, %0, %2\n\t"
@@ -578,6 +578,21 @@ void notrace cpu_init(void)
 	      "I" (offsetof(struct stack, fiq[0])),
 	      PLC (PSR_F_BIT | PSR_I_BIT | SVC_MODE)
 	    : "r14");
+#else
+	__asm__ (
+	"teqp   pc, #0x08000002\n\t" // IRQ mode
+	"add    r14, %0, %1\n\t"
+	"mov    sp, r14\n\t"
+	"teqp   pc, #0x08000001\n\t" // FIQ mode
+	"add    r14, %0, %2\n\t"
+	"mov    sp, r14\n\t"
+	"teqp   pc, #0x08000003\n\t" // SVC mdoe
+	    :
+	    : "r" (stk),
+		  "I" (offsetof(struct stack, irq[0])),
+	      "I" (offsetof(struct stack, fiq[0]))
+	    : "r14");
+#endif
 #endif
 }
 

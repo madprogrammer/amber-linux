@@ -1056,8 +1056,6 @@ vector_\name:
 	eor	r0, r0, #(\mode ^ SVC_MODE | PSR_ISETSTATE)
 	msr	spsr_cxsf, r0
 #else
-	teqp pc, #0x08000003	@ switch to SVC mode
-	mov lr, pc
 	and lr, lr, #0xFC000003
 	str lr, [sp, #8]		@ save flags
 #endif
@@ -1068,8 +1066,6 @@ vector_\name:
 #ifndef CONFIG_ARCH_AMBER
 	and	lr, lr, #0x0f
 #else
-	mov lr, pc
-	orr	lr, #0x08000003
 	and lr, lr, #0x03
 	add lr, lr, #1
 #endif
